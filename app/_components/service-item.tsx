@@ -13,16 +13,16 @@ import {
 } from "./ui/sheet"
 import { Calendar } from "./ui/calendar"
 import { ptBR } from "date-fns/locale"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useSession } from "next-auth/react"
 import TimeItem from "./time-item"
-import Resume from "./resume"
 import { CreateBookings } from "../_actions/create-bookings"
 import { set } from "date-fns"
 import { toast } from "sonner"
 import { getBookings } from "../_actions/get-bookings"
 import { Dialog, DialogContent } from "./ui/dialog"
 import SignInDialog from "./sign-in-dialog"
+import BookingSummary from "./booking-summary"
 
 interface ServiceItemProps {
   service: BarbershopService
@@ -86,21 +86,20 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
     setSelectedTime(time)
   }
 
+  const selectedDate = useMemo(() => {
+    if (!selectedDay || !selectedTime) return
+    return set(selectedDay, {
+      hours: Number(selectedTime?.split(":")[0]),
+      minutes: Number(selectedTime?.split(":")[1]),
+    })
+  }, [selectedDay, selectedTime])
+
   const handleCreateBooking = async () => {
     try {
-      if (!selectedDay || !selectedTime) return
-      const hour = Number(selectedTime.split(":")[0])
-      const minute = Number(selectedTime.split(":")[1])
-
-      const newDate = set(selectedDay, {
-        hours: hour,
-        minutes: minute,
-      })
-
+      if (!selectedDate) return
       await CreateBookings({
         serviceId: service.id,
-        userId: (data?.user as any).id,
-        date: newDate,
+        date: selectedDate,
       })
 
       handleBookingSheetOpenChange()
@@ -228,15 +227,12 @@ const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
                     </div>
                   )}
 
-                  {selectedTime && selectedDay && (
+                  {selectedDate && (
                     <div className="p-5">
-                      <Resume
-                        key={service.name}
-                        name={service.name}
-                        price={Number(service.price)}
-                        data={selectedDay}
-                        hora={selectedTime}
-                        barbearia={barbershop.name}
+                      <BookingSummary
+                        barbershop={barbershop}
+                        service={service}
+                        selectedDate={selectedDate}
                       />
                     </div>
                   )}

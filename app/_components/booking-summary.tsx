@@ -1,23 +1,26 @@
 import { format } from "date-fns"
 import { Card, CardContent } from "./ui/card"
+import { Barbershop, BarbershopService } from "@prisma/client"
 import { ptBR } from "date-fns/locale"
 
-interface ResumeServiceProps {
-  name: string
-  price: number
-  data: Date
-  hora: string
-  barbearia: string
+interface BookingSummaryProps {
+  service: Pick<BarbershopService, "name" | "price">
+  barbershop: Pick<Barbershop, "name">
+  selectedDate: Date
 }
 
-const Resume = ({ ...service }: ResumeServiceProps) => {
+const BookingSummary = ({
+  service,
+  barbershop,
+  selectedDate,
+}: BookingSummaryProps) => {
   return (
     <Card>
       <CardContent className="space-y-3 p-3">
         <div className="flex items-center justify-between">
           <h2 className="font-bold">{service.name}</h2>
           <p className="text-sm font-bold">
-            {Intl.NumberFormat("pt-br", {
+            {Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
             }).format(Number(service.price))}
@@ -26,8 +29,8 @@ const Resume = ({ ...service }: ResumeServiceProps) => {
 
         <div className="flex items-center justify-between">
           <h2 className="text-sm text-gray-400">Data</h2>
-          <p className="text-sm font-bold">
-            {format(service.data, "d 'de' MMMM", {
+          <p className="text-sm">
+            {format(selectedDate, "d 'de' MMMM", {
               locale: ptBR,
             })}
           </p>
@@ -35,16 +38,16 @@ const Resume = ({ ...service }: ResumeServiceProps) => {
 
         <div className="flex items-center justify-between">
           <h2 className="text-sm text-gray-400">Horário</h2>
-          <p className="text-sm font-bold">{service.hora}</p>
+          <p className="text-sm">{format(selectedDate, "HH:mm")}</p>
         </div>
 
         <div className="flex items-center justify-between">
           <h2 className="text-sm text-gray-400">Barbearia</h2>
-          <p className="text-sm font-bold">{service.barbearia}</p>
+          <p className="text-sm">{barbershop.name}</p>
         </div>
       </CardContent>
     </Card>
   )
 }
 
-export default Resume
+export default BookingSummary
