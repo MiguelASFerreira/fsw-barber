@@ -8,6 +8,7 @@ import { Button } from "./_components/ui/button"
 import { quickSearchOptions } from "./_constants/search"
 import Link from "next/link"
 import Image from "next/image"
+import { getConfirmedBookings } from "./_data/get-confirmed-bookings"
 
 const Home = async () => {
   const barbershops = await db.barbershop.findMany({})
@@ -16,6 +17,8 @@ const Home = async () => {
       name: "desc",
     },
   })
+  const confirmedBookings = await getConfirmedBookings()
+
   return (
     <div>
       <Header />
@@ -52,7 +55,22 @@ const Home = async () => {
           <Banner src="/banner-01.png" alt="Banner 01" />
         </div>
 
-        <BookingItem />
+        {confirmedBookings.length > 0 && (
+          <>
+            <h2 className="mb-3 mt-6 text-xs font-bold uppercase text-gray-400">
+              Agendamentos
+            </h2>
+
+            <div className="flex gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+              {confirmedBookings.map((booking) => (
+                <BookingItem
+                  key={booking.id}
+                  booking={JSON.parse(JSON.stringify(booking))}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         <h2 className="mb-3 mt-6 text-xs font-bold uppercase text-gray-400">
           Recomendados
